@@ -6,4 +6,7 @@
 
 TEST(RoundTrip, literal)
 {
+	std::string t = " true ";
+	Parser p(t);
+	EXPECT_EQ(p.parse(), 0);
 }
