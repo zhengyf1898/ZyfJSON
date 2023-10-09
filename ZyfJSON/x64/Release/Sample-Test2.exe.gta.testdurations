@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GtaTestDurations xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Executable>E:\ZyfJSON\ZyfJSON\x64\Release\Sample-Test2.exe</Executable>
+  <TestDurations>
+    <TestDuration Test="RoundTrip.literal" Duration="1" />
+    <TestDuration Test="RoundTrip.number" Duration="1" />
+  </TestDurations>
+</GtaTestDurations>
