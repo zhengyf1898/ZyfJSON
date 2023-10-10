@@ -19,6 +19,13 @@
     EXPECT_EQ(p.getParseNum(), expect); \
   } while (0)
 
+#define testString(expect, value)       \
+  do                                    \
+  {                                     \
+    Parser p(value);                    \
+	p.parse();                          \
+    EXPECT_EQ(p.getParseStr(), expect); \
+  } while (0)
 TEST(RoundTrip, literal)
 {
 	testLiteral("true", 0);
@@ -61,3 +68,15 @@ TEST(RoundTrip, number)
 	testNumber(-1.7976931348623157e+308, "-1.7976931348623157e+308");
 
 };
+
+TEST(RoundTrip, string) {
+	testString("", "\"\"");
+	testString("Hello", "\"Hello\"");
+	testString("Hello\nWorld", "\"Hello\\nWorld\"");
+	testString("\" \\ / \b \f \n \r \t", "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
+	testString("\x24", "\"\\u0024\"");
+	testString("\xC2\xA2", "\"\\u00A2\"");
+	testString("\xE2\x82\xAC", "\"\\u20AC\"");
+	testString("\xF0\x9D\x84\x9E", "\"\\uD834\\uDD1E\"");
+	testString("\xF0\x9D\x84\x9E", "\"\\ud834\\udd1e\"");
+}

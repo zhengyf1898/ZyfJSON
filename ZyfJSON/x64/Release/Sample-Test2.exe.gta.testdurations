@@ -4,5 +4,6 @@
   <TestDurations>
     <TestDuration Test="RoundTrip.literal" Duration="1" />
     <TestDuration Test="RoundTrip.number" Duration="1" />
+    <TestDuration Test="RoundTrip.string" Duration="1" />
   </TestDurations>
 </GtaTestDurations>
