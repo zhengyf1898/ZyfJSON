@@ -6,7 +6,8 @@
 #define testLiteral(value, expect)     \
   do                                   \
   {                                    \
-    Parser p(value);                   \
+    JsonStr literal;                   \
+    Parser p(value, &literal);         \
     EXPECT_EQ(p.parse(), expect);      \
   } while (0)
 
@@ -14,18 +15,25 @@
 #define testNumber(expect, value)       \
   do                                    \
   {                                     \
-    Parser p(value);                    \
+    JsonNum num;                        \
+    Parser p(value, &num);              \
 	p.parse();                          \
-    EXPECT_EQ(p.getParseNum(), expect); \
+    double n;                           \
+    num.getdata(n);                     \
+    EXPECT_EQ(n, expect);               \
   } while (0)
 
 #define testString(expect, value)       \
   do                                    \
   {                                     \
-    Parser p(value);                    \
+    JsonStr str;                        \
+    Parser p(value, &str);              \
 	p.parse();                          \
-    EXPECT_EQ(p.getParseStr(), expect); \
+    string s;                           \
+    str.getdata(s);                     \
+    EXPECT_EQ(s, expect);               \
   } while (0)
+
 TEST(RoundTrip, literal)
 {
 	testLiteral("true", 0);
@@ -79,4 +87,26 @@ TEST(RoundTrip, string) {
 	testString("\xE2\x82\xAC", "\"\\u20AC\"");
 	testString("\xF0\x9D\x84\x9E", "\"\\uD834\\uDD1E\"");
 	testString("\xF0\x9D\x84\x9E", "\"\\ud834\\udd1e\"");
+}
+
+TEST(RoundTrip, array) {
+	JsonArray arr;
+	Parser p("[ null , false , true , \"abc\" , 456 ]", &arr);
+	p.parse();
+
+	string l;
+	arr.data[0]->getdata(l);
+	EXPECT_EQ(l, "null");
+	arr.data[1]->getdata(l);
+	EXPECT_EQ(l, "false");
+	arr.data[2]->getdata(l);
+	EXPECT_EQ(l, "true");
+
+	string s;
+	arr.data[3]->getdata(s);
+	EXPECT_EQ(s, "abc");
+
+	double n;
+	arr.data[4]->getdata(n);
+	EXPECT_EQ(n, 456);
 }

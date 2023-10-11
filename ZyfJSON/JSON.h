@@ -2,7 +2,8 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
-#include<ctype.h>
+#include <ctype.h>
+#include <vector>
 
 using namespace std;
 
@@ -15,14 +16,70 @@ enum {
 	INVALID_STRING_CHAR,
 	INVALID_UNICODE_HEX,
 	INVALID_UNICODE_SURROGATE,
-	INVALID_STRING_ESCAPE
+	INVALID_STRING_ESCAPE,
+	MISS_COMMA_OR_SQUARE_BRACKET
+};
+
+class Json {
+public:
+	virtual void setdata() {};
+	virtual void get() {};
+	virtual void setdata(double value) {};
+	virtual void setdata(char value) {};
+	virtual void setdata(string value) {};
+	virtual void getdata(string& s) {};
+	virtual void getdata(double& value) {};
+	virtual void setdata(Json value) {};
+	virtual void setdata(bool value) {};
+	virtual void getdata(bool& value) {};
+};
+
+class JsonStr :public Json {
+public:
+	virtual void setdata(char value) { data.push_back(value); }
+	virtual void setdata(string value) { data += value; }
+	virtual void getdata(string& s) { s = data; }
+	string data;
+};
+
+class JsonNum :public Json {
+public:
+	virtual void setdata(double value) { data = value; }
+	virtual void getdata(double& value) { value = data; }
+	double data;
+};
+
+
+class JsonLiteral :public Json {
+public:
+	virtual void setdata(bool value) { data = value; }
+	virtual void getdata(bool& value) { value = data; }
+	bool data;
+};
+
+class JsonArray :public Json {
+public:
+	//virtual void setdata(Json value) { data.push_back(value); }
+	virtual void setdata(double value) {
+		Json* dataNum = new JsonNum;
+		dataNum->setdata(value);
+		data.push_back(dataNum);
+	}
+	virtual void setdata(string value) { 
+		Json* dataStr = new JsonStr;
+		dataStr->setdata(value);
+		data.push_back(dataStr);
+	}
+	//virtual void getdata(double& value) { value = data; }
+	vector<Json*> data;
 };
 
 class Parser {
 public:
-	Parser(std::string content) : content_(content) {
+	Parser(std::string content,Json* _j) : content_(content) {
 		start_ = content_.begin();
 		curr_ = content_.begin();
+		j = _j;
 	}
 
 	int parse() {
@@ -40,7 +97,11 @@ public:
 
 	double getParseNum() { return val; }
 
-	string getParseStr() { return str; }
+	string getParseStr(Json* j) { 
+		string s;
+		j->getdata(s);
+		return s; 
+	}
 
 private:
 
@@ -52,6 +113,7 @@ private:
 		catch(...){
 			start_ = curr_;
 		}
+		start_ = curr_;
 	}
 
 	int parseValue() {
@@ -64,19 +126,50 @@ private:
 				return parseLiteral("false");
 			case '\"':
 				return parseRawString();
+			case '[':
+				return parseArray();
 			case '\0':
 				return LEPT_PARSE_EXPECT_VALUE;
 			default:
 				return parseNumber();
 		}
 	}
+	int parseArray() {
+		curr_++, start_++;
+		parseWhitespace();
+		if (*curr_ == ']') {
+			start_ = ++curr_;
+			return LEPT_PARSE_OK;
+		}
+		while (1)
+		{
+			parseWhitespace();
+			parseValue();
+			parseWhitespace();
+			if (*curr_ == ',') {
+				++curr_;
+				++start_;
+			}
+			else if (*curr_ == ']')
+			{
+				start_ = ++curr_;
+				return LEPT_PARSE_OK;
+			}
+			else
+				return MISS_COMMA_OR_SQUARE_BRACKET;
+		}
+		return LEPT_PARSE_OK;
+	}
+
 	int parseRawString() {
+		string str;
 		while (1)
 		{
 			switch (*++curr_)
 			{
 			case '\"':
 				start_ = ++curr_;
+				j->setdata(str);
 				return LEPT_PARSE_OK;
 			case '\0':
 				return MISS_QUOTATION_MARK;
@@ -134,6 +227,7 @@ private:
 				}
 				break;
 			}
+			
 		}
 	}
 
@@ -210,7 +304,8 @@ private:
 			while (isdigit(*++curr_))
 				;
 		}
-		val = strtod(&*start_, nullptr);
+		//cout << strtod(&*start_, nullptr) << std::endl;
+		j->setdata(strtod(&*start_, nullptr));
 		start_ = curr_;
 		return LEPT_PARSE_OK;
 	}
@@ -221,13 +316,14 @@ private:
 				return LEPT_PARSE_INVALID_VALUE;
 		}
 		start_ = curr_;
+		j->setdata(literal);
 		return LEPT_PARSE_OK;
 	}
 
 	string::iterator start_;
 	string::iterator curr_;
 	string content_;
-	string str;
+	Json* j;
 	double val;
 };
 
