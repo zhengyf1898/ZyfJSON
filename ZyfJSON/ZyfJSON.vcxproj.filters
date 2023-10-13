@@ -23,5 +23,8 @@
     <ClInclude Include="JSON.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="JsonData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

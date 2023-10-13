@@ -18,9 +18,7 @@
     JsonNum num;                        \
     Parser p(value, &num);              \
 	p.parse();                          \
-    double n;                           \
-    num.getdata(n);                     \
-    EXPECT_EQ(n, expect);               \
+    EXPECT_EQ(num.getnum(), expect);    \
   } while (0)
 
 #define testString(expect, value)       \
@@ -29,9 +27,7 @@
     JsonStr str;                        \
     Parser p(value, &str);              \
 	p.parse();                          \
-    string s;                           \
-    str.getdata(s);                     \
-    EXPECT_EQ(s, expect);               \
+    EXPECT_EQ(str.getstr(), expect);    \
   } while (0)
 
 TEST(RoundTrip, literal)
@@ -94,19 +90,28 @@ TEST(RoundTrip, array) {
 	Parser p("[ null , false , true , \"abc\" , 456 ]", &arr);
 	p.parse();
 
-	string l;
-	arr.data[0]->getdata(l);
-	EXPECT_EQ(l, "null");
-	arr.data[1]->getdata(l);
-	EXPECT_EQ(l, "false");
-	arr.data[2]->getdata(l);
-	EXPECT_EQ(l, "true");
+	EXPECT_EQ(arr[0].getstr(), "null");
+	EXPECT_EQ(arr[1].getstr(), "false");
+	EXPECT_EQ(arr[2].getstr(), "true");
 
-	string s;
-	arr.data[3]->getdata(s);
-	EXPECT_EQ(s, "abc");
+	EXPECT_EQ(arr[3].getstr(), "abc");
 
-	double n;
-	arr.data[4]->getdata(n);
-	EXPECT_EQ(n, 456);
+	EXPECT_EQ(arr[4].getnum(), 456);
+}
+
+TEST(RoundTrip, array1) {
+	JsonArray arr;
+	Parser p("[ [ 10 ] , [ 0 ] , [ \"helloworld\" , 1 ] , [ 0 , 1 , 2 ] ]", &arr);
+	p.parse();
+
+	EXPECT_EQ(arr[0][0].getnum(), 10);
+
+	EXPECT_EQ(arr[1][0].getnum(), 0);
+
+	EXPECT_EQ(arr[2][0].getstr(), "helloworld");
+	EXPECT_EQ(arr[2][1].getnum(), 1);
+
+	EXPECT_EQ(arr[3][0].getnum(), 0);
+	EXPECT_EQ(arr[3][1].getnum(), 1);
+	EXPECT_EQ(arr[3][2].getnum(), 2);
 }

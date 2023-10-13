@@ -5,5 +5,7 @@
     <TestDuration Test="RoundTrip.literal" Duration="1" />
     <TestDuration Test="RoundTrip.number" Duration="1" />
     <TestDuration Test="RoundTrip.string" Duration="1" />
+    <TestDuration Test="RoundTrip.array" Duration="1" />
+    <TestDuration Test="RoundTrip.array1" Duration="1" />
   </TestDurations>
 </GtaTestDurations>
