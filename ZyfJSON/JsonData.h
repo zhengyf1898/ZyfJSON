@@ -72,3 +72,8 @@ public:
 		return *(JsonArray*)data[i];
 	}
 };
+
+class JsonObject :public Json {
+public:
+
+};

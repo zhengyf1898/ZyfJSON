@@ -18,7 +18,10 @@ enum {
 	INVALID_UNICODE_HEX,
 	INVALID_UNICODE_SURROGATE,
 	INVALID_STRING_ESCAPE,
-	MISS_COMMA_OR_SQUARE_BRACKET
+	MISS_COMMA_OR_SQUARE_BRACKET,
+	MISS_KEY,
+	MISS_COLON,
+	MISS_COMMA_OR_CURLY_BRACKET
 };
 
 //½âÎöÆ÷class
@@ -34,9 +37,11 @@ private:
 	void parseWhitespace();
 	int parseValue();
 	int parseArray();
-	int parseRawString();
+	int parseString();
+	string parseRawString();
 	unsigned parse4hex();
 	int parseNumber();
+	int parseObject();
 	int parseLiteral(const std::string& literal);
 
 	string encodeUTF8(unsigned u) noexcept;
@@ -82,7 +87,7 @@ int Parser::parseValue() {
 	case 'f':
 		return parseLiteral("false");
 	case '\"':
-		return parseRawString();
+		return parseString();
 	case '[':
 		if (test_ != 0) {
 			jvec.push_back(j);
@@ -93,11 +98,46 @@ int Parser::parseValue() {
 		}
 		test_ ++ ;
 		return parseArray();
+	case '{':
+		return parseObject();
 	case '\0':
 		return LEPT_PARSE_EXPECT_VALUE;
 	default:
 		return parseNumber();
 	}
+}
+
+int Parser::parseObject() {
+//	++curr_, ++start_;
+//	parseWhitespace();
+//	if (*curr_ == '}')
+//	{
+//		start_ = ++curr_;
+		return LEPT_PARSE_OK;
+//	}
+//	while (1)
+//	{
+//		parseWhitespace();
+//		if (*curr_ != '"')
+//			return MISS_KEY;
+//		string key = parseRawString();
+//		parseWhitespace();
+//		if (*curr_++ != ':')
+//			return MISS_COLON;
+//		parseWhitespace();
+//		parseValue();
+//		obj.insert({ key, val });
+//		parseWhitespace();
+//		if (*curr_ == ',')
+//			++curr_;
+//		else if (*curr_ == '}')
+//		{
+//			start_ = ++curr_;
+//			return Json(obj);
+//		}
+//		else
+//			return MISS_COMMA_OR_CURLY_BRACKET;
+//	}
 }
 
 int Parser::parseArray() {
@@ -132,7 +172,14 @@ int Parser::parseArray() {
 	return LEPT_PARSE_OK;
 }
 
-int Parser::parseRawString() {
+int Parser::parseString() {
+	string str;
+	str = parseRawString();
+	j->setdata(str);
+	return LEPT_PARSE_OK;
+}
+
+string Parser::parseRawString() {
 	string str;
 	while (1)
 	{
@@ -140,13 +187,12 @@ int Parser::parseRawString() {
 		{
 		case '\"':
 			start_ = ++curr_;
-			j->setdata(str);
-			return LEPT_PARSE_OK;
+			return str;
 		case '\0':
-			return MISS_QUOTATION_MARK;
+			return "";
 		default:
 			if (static_cast<unsigned char>(*curr_) < 0x20)
-				return INVALID_STRING_CHAR;
+				return "";
 			str.push_back(*curr_);
 			break;
 		case '\\':
@@ -182,19 +228,19 @@ int Parser::parseRawString() {
 				if (u1 >= 0xd800 && u1 <= 0xdbff)
 				{ // high surrogate
 					if (*++curr_ != '\\')
-						return INVALID_UNICODE_SURROGATE;
+						return "";
 					if (*++curr_ != 'u')
-						return INVALID_UNICODE_SURROGATE;
+						return "";
 					unsigned u2 = parse4hex(); // low surrogate
 					if (u2 < 0xdc00 || u2 > 0xdfff)
-						return INVALID_UNICODE_SURROGATE;
+						return "";
 					u1 = (((u1 - 0xd800) << 10) | (u2 - 0xdc00)) + 0x10000;
 				}
 				str += encodeUTF8(u1);
 			}
 			break;
 			default:
-				return INVALID_STRING_ESCAPE;
+				return "";
 			}
 			break;
 		}

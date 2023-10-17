@@ -115,3 +115,17 @@ TEST(RoundTrip, array1) {
 	EXPECT_EQ(arr[3][1].getnum(), 1);
 	EXPECT_EQ(arr[3][2].getnum(), 2);
 }
+
+TEST(RoundTrip, JsonObject)
+{
+	JsonObject obj;
+	Parser p(" { "
+             "\"n\" : null , "
+             "\"f\" : false , "
+             "\"t\" : true , "
+             "\"i\" : 123 , "
+             "\"s\" : \"abc\", "
+             "\"a\" : [ 1, 2, 3 ],"
+             "\"o\" : { \"1\" : 1, \"2\" : 2, \"3\" : 3 }"
+			 " } ", &obj);
+}
