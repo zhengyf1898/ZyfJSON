@@ -2,12 +2,12 @@
 # 此 .gitignore 文件已由 Microsoft(R) Visual Studio 自动创建。
 ################################################################################
 
-/ZyfJSON/packages/*
-/ZyfJSON/Release/*
-/ZyfJSON/x64/*
-/ZyfJSON/Debug/*
+/ZyfJSON/packages/
+/ZyfJSON/Release/
+/ZyfJSON/x64/
+/ZyfJSON/Debug/
 /ZyfJSON/.vs/ZyfJSON
 
-/Sample-Test2/Debug/*
-/Sample-Test2/Release/*
-/Sample-Test2/x64/*
+/Sample-Test2/Debug/
+/Sample-Test2/Release/
+/Sample-Test2/x64/
