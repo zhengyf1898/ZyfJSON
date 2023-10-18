@@ -27,7 +27,7 @@ enum {
 //½âÎöÆ÷class
 class Parser {
 public:
-	Parser(std::string content,Json* _j) : content_(content) {
+	Parser(std::string content, Json* _j) : content_(content) {
 		start_ = content_.begin();
 		curr_ = content_.begin();
 		j = _j;
@@ -53,6 +53,7 @@ private:
 	vector<Json*> jvec;
 	double val;
 	int test_ = 0;
+	int test__ = 0;
 };
 
 int Parser::parse() {
@@ -89,16 +90,24 @@ int Parser::parseValue() {
 	case '\"':
 		return parseString();
 	case '[':
-		if (test_ != 0) {
+		if (test_ != 0 || test__ != 0) {
 			jvec.push_back(j);
 			j = nullptr;
 			Json* _j = new JsonArray();
 			if (_j == NULL) return -1;
 			j = _j;
 		}
-		test_ ++ ;
+		test_++;
 		return parseArray();
 	case '{':
+		if (test__ != 0) {
+			jvec.push_back(j);
+			j = nullptr;
+			Json* _j = new JsonObject();
+			if (_j == NULL) return -1;
+			j = _j;
+		}
+		test__++;
 		return parseObject();
 	case '\0':
 		return LEPT_PARSE_EXPECT_VALUE;
@@ -108,36 +117,44 @@ int Parser::parseValue() {
 }
 
 int Parser::parseObject() {
-//	++curr_, ++start_;
-//	parseWhitespace();
-//	if (*curr_ == '}')
-//	{
-//		start_ = ++curr_;
+	++curr_;
+	parseWhitespace();
+	if (*curr_ == '}')
+	{
+		start_ = ++curr_;
 		return LEPT_PARSE_OK;
-//	}
-//	while (1)
-//	{
-//		parseWhitespace();
-//		if (*curr_ != '"')
-//			return MISS_KEY;
-//		string key = parseRawString();
-//		parseWhitespace();
-//		if (*curr_++ != ':')
-//			return MISS_COLON;
-//		parseWhitespace();
-//		parseValue();
-//		obj.insert({ key, val });
-//		parseWhitespace();
-//		if (*curr_ == ',')
-//			++curr_;
-//		else if (*curr_ == '}')
-//		{
-//			start_ = ++curr_;
-//			return Json(obj);
-//		}
-//		else
-//			return MISS_COMMA_OR_CURLY_BRACKET;
-//	}
+	}
+	while (1)
+	{
+		parseWhitespace();
+		if (*curr_ != '\"')
+			return MISS_KEY;
+		string key = parseRawString();
+		j->setkey(key);
+		parseWhitespace();
+		if (*curr_ != ':')
+			return MISS_COLON;
+		start_ = ++curr_;
+		parseWhitespace();
+		parseValue();
+		parseWhitespace();
+		if (*curr_ == ',') {
+			++curr_;
+			++start_;
+		}
+		else if (*curr_ == '}')
+		{
+			start_ = ++curr_;
+			if (jvec.size() != 0) {
+				jvec.back()->setdata(j);
+				j = jvec.back();
+				jvec.pop_back();
+			}
+			return LEPT_PARSE_OK;
+		}
+		else
+			return MISS_COMMA_OR_CURLY_BRACKET;
+	}
 }
 
 int Parser::parseArray() {
@@ -189,7 +206,7 @@ string Parser::parseRawString() {
 			start_ = ++curr_;
 			return str;
 		case '\0':
-			return "";
+			return "err";
 		default:
 			if (static_cast<unsigned char>(*curr_) < 0x20)
 				return "";

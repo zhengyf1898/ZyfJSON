@@ -124,8 +124,22 @@ TEST(RoundTrip, JsonObject)
              "\"f\" : false , "
              "\"t\" : true , "
              "\"i\" : 123 , "
-             "\"s\" : \"abc\", "
-             "\"a\" : [ 1, 2, 3 ],"
-             "\"o\" : { \"1\" : 1, \"2\" : 2, \"3\" : 3 }"
+             "\"s\" : \"abc\" , "
+             "\"a\" : [ 1 , 2 , 3 ] , "
+             "\"o\" : { \"1\" : [ \"str\" , 2 , 3 ], \"2\" : 222, \"3\" : 333 }"
 			 " } ", &obj);
+	p.parse();
+	EXPECT_EQ(obj["n"].getstr(), "null");
+	EXPECT_EQ(obj["f"].getstr(), "false");
+	EXPECT_EQ(obj["t"].getstr(), "true");
+	EXPECT_EQ(obj["i"].getnum(), 123);
+	EXPECT_EQ(obj["s"].getstr(), "abc");
+	EXPECT_EQ(obj["a"][0].getnum(), 1);
+	EXPECT_EQ(obj["a"][1].getnum(), 2);
+	EXPECT_EQ(obj["a"][2].getnum(), 3);
+	EXPECT_EQ(obj["o"]["1"][0].getstr(), "str");
+	EXPECT_EQ(obj["o"]["1"][1].getnum(), 2);
+	EXPECT_EQ(obj["o"]["1"][2].getnum(), 3);
+	EXPECT_EQ(obj["o"]["2"].getnum(), 222);
+	EXPECT_EQ(obj["o"]["3"].getnum(), 333);
 }

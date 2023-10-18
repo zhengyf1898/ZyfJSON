@@ -2,11 +2,13 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <unordered_map>
 
 using namespace std;
 //数据基类class
 class Json {
 public:
+	virtual void gettype() {};
 	virtual void setdata() {};
 	//virtual void get() {};
 	virtual void setdata(double value) {}
@@ -18,6 +20,8 @@ public:
 	virtual void setdata(Json* value) {}
 	virtual void getdata(bool& value) {}
 	virtual Json& operator[](int i) { return *new Json(); }
+	virtual Json& operator[](string str) { return *new Json(); }
+	virtual void setkey(std::string key){}
 };
 
 class JsonStr :public Json {
@@ -26,6 +30,9 @@ public:
 	virtual void setdata(std::string value) { data += value; }
 	string getstr() { return data; }
 	std::string data;
+	virtual void gettype() {
+		std::cout << "type is str;" << std::endl;
+	}
 };
 
 class JsonNum :public Json {
@@ -34,6 +41,9 @@ public:
 	virtual double getnum() { return data; }
 	//double get() { return data; }
 	double data;
+	virtual void gettype() {
+		std::cout << "type is num;" << std::endl;
+	}
 };
 
 class JsonLiteral :public Json {
@@ -71,9 +81,47 @@ public:
 		}
 		return *(JsonArray*)data[i];
 	}
+	virtual void gettype() {
+		std::cout << "type is arr;" << std::endl;
+	}
 };
 
 class JsonObject :public Json {
 public:
+	virtual void setdata(Json* value) {
+		if (key.length() != 0) {
+			data.insert({ key, value });
+		}
+	}
 
+	virtual void setdata(double value) {
+		if (key.length() != 0) {
+			Json* dataNum = new JsonNum;
+			dataNum->setdata(value);
+			data.insert({ key, dataNum });
+		}
+	}
+
+	virtual void setdata(std::string value) {
+		if (key.length() != 0) {
+			Json* dataStr = new JsonStr;
+			dataStr->setdata(value);
+			data.insert({ key, dataStr });
+		}
+	}
+
+	virtual void setkey(string _key) {
+		key = _key;
+	}
+	std::unordered_map<std::string, Json*> data;
+	std::string key;
+
+	virtual Json& operator[](string str)
+	{
+		return *(Json*)data[str];
+	}
+
+	virtual void gettype() {
+		std::cout << "type is obj;" << std::endl;
+	}
 };
