@@ -30,6 +30,15 @@
     EXPECT_EQ(str.getstr(), expect);    \
   } while (0)
 
+#define testError(expect, strJson)            \
+  do                                          \
+  {                                           \
+    string errMsg;                            \
+    Json json = Json::parse(strJson, errMsg); \
+    auto pos = errMsg.find_first_of(":");     \
+    auto actual = errMsg.substr(0, pos);      \
+    EXPECT_EQ(actual, expect);                \
+  } while (0)
 TEST(RoundTrip, literal)
 {
 	testLiteral("true", 0);

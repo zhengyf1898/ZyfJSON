@@ -29,27 +29,30 @@ public:
 	virtual void setdata(char value) { data.push_back(value); }
 	virtual void setdata(std::string value) { data += value; }
 	string getstr() { return data; }
-	std::string data;
 	virtual void gettype() {
 		std::cout << "type is str;" << std::endl;
 	}
+private:
+	std::string data;
 };
 
 class JsonNum :public Json {
 public:
 	virtual void setdata(double value) { data = value; }
 	virtual double getnum() { return data; }
-	//double get() { return data; }
-	double data;
 	virtual void gettype() {
 		std::cout << "type is num;" << std::endl;
 	}
+private:
+	//double get() { return data; }
+	double data;
 };
 
 class JsonLiteral :public Json {
 public:
 	virtual void setdata(bool value) { data = value; }
 	virtual void getdata(bool& value) { value = data; }
+private:
 	bool data;
 };
 
@@ -68,9 +71,6 @@ public:
 		dataStr->setdata(value);
 		data.push_back(dataStr);
 	}
-	//virtual void getdata(double& value) { value = data; }
-	std::vector<Json*> data;
-
 	virtual JsonArray& operator[](int i)
 	{
 		if (i >= data.size())
@@ -84,6 +84,9 @@ public:
 	virtual void gettype() {
 		std::cout << "type is arr;" << std::endl;
 	}
+private:
+	//virtual void getdata(double& value) { value = data; }
+	std::vector<Json*> data;
 };
 
 class JsonObject :public Json {
@@ -113,8 +116,6 @@ public:
 	virtual void setkey(string _key) {
 		key = _key;
 	}
-	std::unordered_map<std::string, Json*> data;
-	std::string key;
 
 	virtual Json& operator[](string str)
 	{
@@ -124,4 +125,7 @@ public:
 	virtual void gettype() {
 		std::cout << "type is obj;" << std::endl;
 	}
+private:
+	std::unordered_map<std::string, Json*> data;
+	std::string key;
 };
