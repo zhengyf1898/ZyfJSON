@@ -6,7 +6,7 @@
 -   该 cpp json 项目主要参考 Milo Yip《从零开始的 JSON 库教程》https://github.com/miloyip/json-tutorial.git <br />以及 https://github.com/Yuan-Hang/Json.git, 通过该项目熟悉c++和stl相关特性。
 -   小白一枚，编程新手，请大佬指教。
 
-### 特点：333&444
+### 特点：
 
 1.  C++ 11 及以上, MSVC编译生成
 2.  实现JSON解析器
